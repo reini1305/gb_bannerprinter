@@ -17,7 +17,7 @@ void print_tile(uint8_t* tile_data, uint8_t letter, uint8_t inverted)
     uint8_t background = inverted? 0x00:0xFF;
     uint8_t foreground = inverted? 0xFF:0x00;
     // We embed a 8x8 graphics in a 20x16 tileset
-    for (ty = 0; ty < 8; ty++)
+    for (ty = 1; ty < 8; ty++)
     {
         for (i = 0; i < 2; i++)
         {

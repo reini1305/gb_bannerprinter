@@ -133,7 +133,7 @@ void PrintTileData(uint8_t *TileData, uint8_t lf){
         CRC = 0;
         packet_num ++;
 
-        if (packet_num == 8) // all done the page
+        if (packet_num == 7) // all done the page
         {
             SendPrinterCommand(PRINTER_EOF); // data end packet
             if (lf)
