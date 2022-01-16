@@ -106,7 +106,7 @@ uint8_t GetLow(uint16_t w) {
     return (w & 0xFFu);
 }
 
-void PrintTileData(uint8_t *TileData, uint8_t lf){
+void PrintTileData(uint8_t *TileData, uint8_t lf, uint8_t num_packets){
     uint8_t TileIndex;
     
     if (tile_num == 0)
@@ -133,7 +133,7 @@ void PrintTileData(uint8_t *TileData, uint8_t lf){
         CRC = 0;
         packet_num ++;
 
-        if (packet_num == 7) // all done the page
+        if (packet_num == num_packets) // all done the page
         {
             SendPrinterCommand(PRINTER_EOF); // data end packet
             if (lf)

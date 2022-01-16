@@ -23,8 +23,8 @@ void print_tile(uint8_t* tile_data, uint8_t letter, uint8_t inverted)
         {
             // first tile is background
             memset(p_data, background, sizeof(p_data));
-            PrintTileData(p_data, 0);
-            PrintTileData(p_data, 0);
+            PrintTileData(p_data, 0, 7);
+            PrintTileData(p_data, 0, 7);
             for (tx = 0; tx < 8; tx++)
             {
                 // get half nibble
@@ -32,13 +32,13 @@ void print_tile(uint8_t* tile_data, uint8_t letter, uint8_t inverted)
                 val = val & (1 << (7-ty));
                 val = val > 0? foreground:background;
                 memset(p_data, val, sizeof(p_data));
-                PrintTileData(p_data, 0);
-                PrintTileData(p_data, 0);
+                PrintTileData(p_data, 0, 7);
+                PrintTileData(p_data, 0, 7);
             }
             // last tile is background
             memset(p_data, background, sizeof(p_data));
-            PrintTileData(p_data, 0);
-            PrintTileData(p_data, 0);
+            PrintTileData(p_data, 0, 7);
+            PrintTileData(p_data, 0, 7);
         }
         GetPrinterStatus();
         if (CheckForErrors())

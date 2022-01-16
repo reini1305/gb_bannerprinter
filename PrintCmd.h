@@ -11,5 +11,5 @@ extern void SendPrinterCommand(unsigned char *Command);
 extern int CheckLinkCable();
 extern int GetPrinterStatus();
 extern int CheckForErrors();
-extern void PrintTileData(unsigned char *TileData, uint8_t lf);
+extern void PrintTileData(unsigned char *TileData, uint8_t lf, uint8_t num_packets);
 extern uint8_t CheckBusy();

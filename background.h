@@ -22,6 +22,6 @@
 #define backgroundHeight 18
 #define backgroundBank 0
 
-extern unsigned char background[];
+extern const unsigned char background[];
 
 /* End of BACKGROUND.H */
