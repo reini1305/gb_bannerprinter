@@ -8,39 +8,53 @@
 #include "font.h"
 #include "cursors.h"
 
-void print_tile(uint8_t* tile_data, uint8_t letter, uint8_t inverted)
+void print_tile(uint8_t* tile_data, uint8_t letter, uint8_t status)
 {
     uint8_t tx, ty;
     uint8_t *tile_index = tile_data + letter * 16;
     uint8_t p_data[16];
     uint8_t i, val;
-    uint8_t background = inverted? 0x00:0xFF;
-    uint8_t foreground = inverted? 0xFF:0x00;
-    uint8_t fontwidth = (letter == '@' || letter == '|')? 9:7;
+    uint8_t background = (status & 0x1)? 0x00:0xFF;
+    uint8_t foreground = (status & 0x1)? 0xFF:0x00;
+    uint8_t rotated = status & 0x2;
+    uint8_t fontwidth = ((letter == '@' || letter == '|') && !rotated)? 9:7;
+    uint8_t printlength = (rotated)? 9:fontwidth;
     // We embed a 8x8 graphics in a 20x16 tileset
-    ty = (fontwidth == 9)? 0:1;
+    ty = (fontwidth == 9 || rotated)? 0:1;
+    // additional blank line at the beginning if rotated
+    if (rotated) {
+        memset(p_data, background, sizeof(p_data));
+        for (i = 0; i < 40; i++) {
+            PrintTileData(p_data, 0, printlength);
+        }
+    }
     for (; ty < 8; ty++)
     {
         for (i = 0; i < 2; i++)
         {
             // first tile is background
             memset(p_data, background, sizeof(p_data));
-            PrintTileData(p_data, 0, fontwidth);
-            PrintTileData(p_data, 0, fontwidth);
+            PrintTileData(p_data, 0, printlength);
+            PrintTileData(p_data, 0, printlength);
             for (tx = 0; tx < 8; tx++)
             {
                 // get half nibble
-                val = *(tile_index + (7-tx) * 2 + 1);
-                val = val & (1 << (7-ty));
+                if (rotated) {
+                    val = *(tile_index + ty * 2 + 1);
+                    val = val & (1 << (7-tx));
+                } else {
+                    val = *(tile_index + (7-tx) * 2 + 1);
+                    val = val & (1 << (7-ty));
+                }
                 val = val > 0? foreground:background;
                 memset(p_data, val, sizeof(p_data));
-                PrintTileData(p_data, 0, fontwidth);
-                PrintTileData(p_data, 0, fontwidth);
+                PrintTileData(p_data, 0, printlength);
+                PrintTileData(p_data, 0, printlength);
             }
             // last tile is background
             memset(p_data, background, sizeof(p_data));
-            PrintTileData(p_data, 0, fontwidth);
-            PrintTileData(p_data, 0, fontwidth);
+            PrintTileData(p_data, 0, printlength);
+            PrintTileData(p_data, 0, printlength);
         }
         GetPrinterStatus();
         if (CheckForErrors()){
@@ -48,10 +62,10 @@ void print_tile(uint8_t* tile_data, uint8_t letter, uint8_t inverted)
         }
     }
     if (fontwidth == 9) {
-        // additional blank line at the end
+        // additional blank line at the end for wide characters
         memset(p_data, background, sizeof(p_data));
         for (i = 0; i < 40; i++) {
-            PrintTileData(p_data, 0, fontwidth);
+            PrintTileData(p_data, 0, printlength);
         }
         GetPrinterStatus();
         if (CheckForErrors()){
@@ -76,13 +90,27 @@ void draw_printer(uint8_t bad) {
     }
 }
 
-void draw_settings(uint8_t inverted) {
-    if (!inverted){
+void draw_settings(uint8_t status) {
+    switch (status)
+    {
+    case 2:
         set_sprite_tile(4, 12);
         set_sprite_tile(5, 14);
-    } else {
+        break;
+    case 3:
         set_sprite_tile(4, 16);
         set_sprite_tile(5, 18);
+        break;
+    case 0:
+        set_sprite_tile(4, 20);
+        set_sprite_tile(5, 22);
+        break;
+    case 1:
+        set_sprite_tile(4, 24);
+        set_sprite_tile(5, 26);
+        break;
+    default:
+        break;
     }
 }
 
@@ -90,17 +118,17 @@ uint8_t print_buffer[17];
 
 void main(void)
 {
-    uint8_t i, x, y, c = 0, inverted = 0;
+    uint8_t i, x, y, c = 0, status = 0;
     HIDE_BKG;
     SPRITES_8x16;
     set_bkg_data(128, 128, font);
     set_bkg_data(0, 10, tiles);
     set_bkg_tiles(0, 0, 20,18, background);
-    set_sprite_data(0, 20, cursors);
+    set_sprite_data(0, 28, cursors);
     set_sprite_tile(0, 0);
     set_sprite_tile(1, 2);
     draw_printer(0);
-    draw_settings(inverted);
+    draw_settings(status);
     move_sprite(2, 12*8, 17*8);
     move_sprite(3, 13*8, 17*8);
     move_sprite(4, 8*8, 17*8);
@@ -131,7 +159,7 @@ void main(void)
                 PrinterInit();
                 for(i = 0; i < c; i++){
                     draw_cursor(2+i, 0x0C);
-                    print_tile(font, print_buffer[i], inverted);
+                    print_tile(font, print_buffer[i], status);
                     GetPrinterStatus();
                     while(CheckBusy()) {
                         wait_vbl_done();
@@ -140,8 +168,8 @@ void main(void)
                 draw_cursor(x,y);
             }
         } else if (i == J_SELECT) {
-            inverted = inverted? 0:1;
-            draw_settings(inverted);
+            status = (status + 1) % 4;
+            draw_settings(status);
         } else if (i == J_A){
             if (c < 16 ) {
                 set_vram_byte(get_bkg_xy_addr(2+c, 0x0C), 128 + 32 + (y-3)*16+(x-2));

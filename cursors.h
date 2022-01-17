@@ -10,7 +10,7 @@
   Compression          : None.
   Counter              : None.
   Tile size            : 16 x 16
-  Tiles                : 0 to 20
+  Tiles                : 0 to 27
 
   Palette colors       : None.
   SGB Palette          : None.
@@ -26,6 +26,6 @@
 /* Bank of tiles. */
 #define cursorsBank 0
 /* Start of tile array. */
-extern const unsigned char cursors[];
+extern unsigned char cursors[];
 
 /* End of CURSORS.H */
