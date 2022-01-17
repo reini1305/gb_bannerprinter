@@ -16,15 +16,17 @@ void print_tile(uint8_t* tile_data, uint8_t letter, uint8_t inverted)
     uint8_t i, val;
     uint8_t background = inverted? 0x00:0xFF;
     uint8_t foreground = inverted? 0xFF:0x00;
+    uint8_t fontwidth = (letter == '@' || letter == '|')? 9:7;
     // We embed a 8x8 graphics in a 20x16 tileset
-    for (ty = 1; ty < 8; ty++)
+    ty = (fontwidth == 9)? 0:1;
+    for (; ty < 8; ty++)
     {
         for (i = 0; i < 2; i++)
         {
             // first tile is background
             memset(p_data, background, sizeof(p_data));
-            PrintTileData(p_data, 0, 7);
-            PrintTileData(p_data, 0, 7);
+            PrintTileData(p_data, 0, fontwidth);
+            PrintTileData(p_data, 0, fontwidth);
             for (tx = 0; tx < 8; tx++)
             {
                 // get half nibble
@@ -32,17 +34,27 @@ void print_tile(uint8_t* tile_data, uint8_t letter, uint8_t inverted)
                 val = val & (1 << (7-ty));
                 val = val > 0? foreground:background;
                 memset(p_data, val, sizeof(p_data));
-                PrintTileData(p_data, 0, 7);
-                PrintTileData(p_data, 0, 7);
+                PrintTileData(p_data, 0, fontwidth);
+                PrintTileData(p_data, 0, fontwidth);
             }
             // last tile is background
             memset(p_data, background, sizeof(p_data));
-            PrintTileData(p_data, 0, 7);
-            PrintTileData(p_data, 0, 7);
+            PrintTileData(p_data, 0, fontwidth);
+            PrintTileData(p_data, 0, fontwidth);
         }
         GetPrinterStatus();
-        if (CheckForErrors())
-        {
+        if (CheckForErrors()){
+            return;
+        }
+    }
+    if (fontwidth == 9) {
+        // additional blank line at the end
+        memset(p_data, background, sizeof(p_data));
+        for (i = 0; i < 40; i++) {
+            PrintTileData(p_data, 0, fontwidth);
+        }
+        GetPrinterStatus();
+        if (CheckForErrors()){
             return;
         }
     }
@@ -122,7 +134,6 @@ void main(void)
                     print_tile(font, print_buffer[i], inverted);
                     GetPrinterStatus();
                     while(CheckBusy()) {
-                        // do progress bar here
                         wait_vbl_done();
                     }
                 }
