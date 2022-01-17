@@ -8,8 +8,8 @@ You can load the ROM onto a flash cart or in an emulator. The key mapping is as 
 - D-Pad to choose a character from the map
 - A selects the current character
 - B deletes the last character
-- Select sets the color scheme (black on white or white on black)
-- Start prints the current string
+- SELECT sets the color scheme (black on white or white on black) and rotation
+- START prints the current string
 
 If your printer is properly connected, the printer icon will show a checkmark symbol.
 
