@@ -1,6 +1,5 @@
 #include <gb/gb.h>
-#include <stdint.h>
-#include <stdio.h>
+#include <gb/cgb.h>
 #include <string.h>
 #include "PrintCmd.h"
 #include "tiles.h"
@@ -115,6 +114,7 @@ void draw_settings(uint8_t status) {
 }
 
 uint8_t print_buffer[17];
+const uint16_t cgb_palette[4] = {21369, 2737, 6534, 2274};
 
 void main(void)
 {
@@ -124,6 +124,8 @@ void main(void)
     set_bkg_data(128, 128, font);
     set_bkg_data(0, 10, tiles);
     set_bkg_tiles(0, 0, 20,18, background);
+    set_bkg_palette(0, 1, cgb_palette);
+    set_sprite_palette(0, 1, cgb_palette);
     set_sprite_data(0, 28, cursors);
     set_sprite_tile(0, 0);
     set_sprite_tile(1, 2);

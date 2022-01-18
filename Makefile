@@ -19,7 +19,7 @@ compile.bat: Makefile
 
 # Link the compiled object files into a .gb ROM file
 $(BINS):	$(OBJS)
-	$(CC) $(LCCFLAGS) -o $(BINS) $(OBJS)
+	$(CC) $(LCCFLAGS) -Wm-yC -o $(BINS) $(OBJS)
 
 clean:
 	rm -f *.gb *.o *.lst *.map *~ *.rel *.cdb *.ihx *.lnk *.sym *.asm *.noi

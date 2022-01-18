@@ -22,10 +22,14 @@
 
 */
 
+#ifndef __cursors_h_INCLUDE
+#define __cursors_h_INCLUDE
 
 /* Bank of tiles. */
 #define cursorsBank 0
 /* Start of tile array. */
 extern const unsigned char cursors[];
+
+#endif
 
 /* End of CURSORS.H */
