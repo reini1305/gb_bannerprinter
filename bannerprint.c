@@ -34,7 +34,7 @@ void update_printer_progress(void) {
 }
 
 
-void print_tile(uint8_t* tile_data, uint8_t letter, uint8_t status)
+void print_tile(uint8_t* tile_data, uint8_t letter, uint8_t status, uint8_t linefeed)
 {
     uint8_t tx, ty;
     uint8_t *tile_index = tile_data + letter * 16;
@@ -51,7 +51,7 @@ void print_tile(uint8_t* tile_data, uint8_t letter, uint8_t status)
     if (rotated) {
         memset(p_data, background, sizeof(p_data));
         for (i = 0; i < 40; i++) {
-            PrintTileData(p_data, 0, printlength);
+            PrintTileData(p_data, linefeed, printlength);
         }
     }
     for (; ty < 8; ty++)
@@ -60,8 +60,8 @@ void print_tile(uint8_t* tile_data, uint8_t letter, uint8_t status)
         {
             // first tile is background
             memset(p_data, background, sizeof(p_data));
-            PrintTileData(p_data, 0, printlength);
-            PrintTileData(p_data, 0, printlength);
+            PrintTileData(p_data, linefeed, printlength);
+            PrintTileData(p_data, linefeed, printlength);
             for (tx = 0; tx < 8; tx++)
             {
                 // get half nibble
@@ -74,13 +74,13 @@ void print_tile(uint8_t* tile_data, uint8_t letter, uint8_t status)
                 }
                 val = val > 0? foreground:background;
                 memset(p_data, val, sizeof(p_data));
-                PrintTileData(p_data, 0, printlength);
-                PrintTileData(p_data, 0, printlength);
+                PrintTileData(p_data, linefeed, printlength);
+                PrintTileData(p_data, linefeed, printlength);
             }
             // last tile is background
             memset(p_data, background, sizeof(p_data));
-            PrintTileData(p_data, 0, printlength);
-            PrintTileData(p_data, 0, printlength);
+            PrintTileData(p_data, linefeed, printlength);
+            PrintTileData(p_data, linefeed, printlength);
         }
         update_printer_progress();
         GetPrinterStatus();
@@ -163,11 +163,11 @@ void main(void)
     set_sprite_tile(1, 2);
     draw_printer(0);
     draw_settings(status);
-    move_sprite(2, 12*8, 17*8);
-    move_sprite(3, 13*8, 17*8);
-    move_sprite(4, 8*8, 17*8);
-    move_sprite(5, 9*8, 17*8);
-    x = 2; y = 3;
+    move_sprite(2, 12*8, 16*8);
+    move_sprite(3, 13*8, 16*8);
+    move_sprite(4, 8*8, 16*8);
+    move_sprite(5, 9*8, 16*8);
+    x = 2; y = 2;
     for(i = 0; i < 96; i++){
         set_vram_byte(get_bkg_xy_addr(x, y), 128 + 32 + i);
         if (++x > 0x11) {
@@ -175,7 +175,7 @@ void main(void)
             ++y;
         }   
     }
-    x = 2; y = 3;
+    x = 2; y = 2;
     draw_cursor(x, y);
     SHOW_BKG;
     SHOW_SPRITES;
@@ -192,13 +192,19 @@ void main(void)
             if (!(GetPrinterStatus() && CheckLinkCable())){
                 PrinterInit();
                 for(i = 0; i < c; i++){
-                    draw_cursor(2+i, 0x0C);
-                    print_tile(font, print_buffer[i], status);
-                    GetPrinterStatus();
-                    while(CheckBusy()) {
-                        for (wait = 0; wait < 30; wait++)
-                            wait_vbl_done();
-                        update_printer_progress();
+                    if (print_buffer[i] != 127) { //CR character
+                        draw_cursor(2+i, 0x0B);
+                        // if we are in the second to last character and the last
+                        // one is a CR, add linefeed
+                        print_tile(font,
+                                   print_buffer[i],
+                                   status, i == c-2 && print_buffer[c-1] == 127);
+                        GetPrinterStatus();
+                        while(CheckBusy()) {
+                            for (wait = 0; wait < 30; wait++)
+                                wait_vbl_done();
+                            update_printer_progress();
+                        }
                     }
                 }
                 draw_cursor(x,y);
@@ -208,14 +214,14 @@ void main(void)
             draw_settings(status);
         } else if (i == J_A){
             if (c < 16 ) {
-                set_vram_byte(get_bkg_xy_addr(2+c, 0x0C), 128 + 32 + (y-3)*16+(x-2));
-                print_buffer[c] = 32 + (y-3)*16+(x-2);
+                set_vram_byte(get_bkg_xy_addr(2+c, 0x0B), 128 + 32 + (y-2)*16+(x-2));
+                print_buffer[c] = 32 + (y-2)*16+(x-2);
                 c++;
             }
         } else if (i == J_B){
             if (c > 0) {
                 --c;
-                set_vram_byte(get_bkg_xy_addr(2+c, 0x0C),0x9);
+                set_vram_byte(get_bkg_xy_addr(2+c, 0x0B),0x9);
             }
         } else if (i == J_LEFT){
             if (--x < 0x2)
