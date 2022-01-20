@@ -7,6 +7,33 @@
 #include "font.h"
 #include "cursors.h"
 
+void update_printer_progress(void) {
+    static uint8_t status = 0;
+    switch (status)
+    {
+    case 0:
+        set_sprite_tile(2, 28);
+        set_sprite_tile(3, 30);
+        break;
+    case 1:
+        set_sprite_tile(2, 32);
+        set_sprite_tile(3, 34);
+        break;
+    case 2:
+        set_sprite_tile(2, 36);
+        set_sprite_tile(3, 38);
+        break;
+    case 3:
+        set_sprite_tile(2, 8);
+        set_sprite_tile(3, 10);
+        break;
+    default:
+        break;
+    }
+    status = (status + 1) % 4;
+}
+
+
 void print_tile(uint8_t* tile_data, uint8_t letter, uint8_t status)
 {
     uint8_t tx, ty;
@@ -55,6 +82,7 @@ void print_tile(uint8_t* tile_data, uint8_t letter, uint8_t status)
             PrintTileData(p_data, 0, printlength);
             PrintTileData(p_data, 0, printlength);
         }
+        update_printer_progress();
         GetPrinterStatus();
         if (CheckForErrors()){
             return;
@@ -66,6 +94,7 @@ void print_tile(uint8_t* tile_data, uint8_t letter, uint8_t status)
         for (i = 0; i < 40; i++) {
             PrintTileData(p_data, 0, printlength);
         }
+        update_printer_progress();
         GetPrinterStatus();
         if (CheckForErrors()){
             return;
@@ -79,6 +108,7 @@ void draw_cursor(uint8_t x, uint8_t y) {
     move_sprite(1, 8*(x+1)+4, 8*(y+1)+4);
 }
 
+
 void draw_printer(uint8_t bad) {
     if (!bad){
         set_sprite_tile(3, 10);
@@ -88,6 +118,7 @@ void draw_printer(uint8_t bad) {
         set_sprite_tile(2, 4);
     }
 }
+
 
 void draw_settings(uint8_t status) {
     switch (status)
@@ -113,12 +144,13 @@ void draw_settings(uint8_t status) {
     }
 }
 
+
 uint8_t print_buffer[17];
 const uint16_t cgb_palette[4] = {21369, 2737, 6534, 2274};
 
 void main(void)
 {
-    uint8_t i, x, y, c = 0, status = 0;
+    uint8_t i, x, y, c = 0, status = 0, wait = 0;
     HIDE_BKG;
     SPRITES_8x16;
     set_bkg_data(128, 128, font);
@@ -126,7 +158,7 @@ void main(void)
     set_bkg_tiles(0, 0, 20,18, background);
     set_bkg_palette(0, 1, cgb_palette);
     set_sprite_palette(0, 1, cgb_palette);
-    set_sprite_data(0, 28, cursors);
+    set_sprite_data(0, 40, cursors);
     set_sprite_tile(0, 0);
     set_sprite_tile(1, 2);
     draw_printer(0);
@@ -164,7 +196,9 @@ void main(void)
                     print_tile(font, print_buffer[i], status);
                     GetPrinterStatus();
                     while(CheckBusy()) {
-                        wait_vbl_done();
+                        for (wait = 0; wait < 30; wait++)
+                            wait_vbl_done();
+                        update_printer_progress();
                     }
                 }
                 draw_cursor(x,y);
