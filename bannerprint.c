@@ -231,12 +231,12 @@ void main(void)
                 x = 0x2;
             draw_cursor(x, y);
         } else if (i == J_DOWN){
-            if (++y > 0x8)
-                y = 0x3;
+            if (++y > 0x7)
+                y = 0x2;
             draw_cursor(x, y);
         } else if (i == J_UP){
-            if (--y < 0x3)
-                y = 0x8;
+            if (--y < 0x2)
+                y = 0x7;
             draw_cursor(x, y);
         }
     }
