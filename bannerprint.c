@@ -43,7 +43,7 @@ void print_tile(uint8_t* tile_data, uint8_t letter, uint8_t status, uint8_t line
     uint8_t background = (status & 0x1)? 0x00:0xFF;
     uint8_t foreground = (status & 0x1)? 0xFF:0x00;
     uint8_t rotated = status & 0x2;
-    uint8_t fontwidth = ((letter == '@' || letter == '|') && !rotated)? 9:7;
+    uint8_t fontwidth = ((letter == '@' || letter >= '{') && !rotated)? 9:7;
     uint8_t printlength = (rotated)? 9:fontwidth;
     // We embed a 8x8 graphics in a 20x16 tileset
     ty = (fontwidth == 9 || rotated)? 0:1;
@@ -194,11 +194,10 @@ void main(void)
                 for(i = 0; i < c; i++){
                     if (print_buffer[i] != 127) { //CR character
                         draw_cursor(2+i, 0x0B);
-                        // if we are in the second to last character and the last
-                        // one is a CR, add linefeed
+                        // if the next character is a CR, add linefeed
                         print_tile(font,
                                    print_buffer[i],
-                                   status, i == c-2 && print_buffer[c-1] == 127);
+                                   status, print_buffer[i+1] == 127);
                         GetPrinterStatus();
                         while(CheckBusy()) {
                             for (wait = 0; wait < 30; wait++)
