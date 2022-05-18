@@ -199,6 +199,9 @@ void main(void)
                                    print_buffer[i],
                                    status, print_buffer[i+1] == 127);
                         GetPrinterStatus();
+                        while(!CheckBusy()) {
+                            wait_vbl_done();
+                        }
                         while(CheckBusy()) {
                             for (wait = 0; wait < 30; wait++)
                                 wait_vbl_done();
