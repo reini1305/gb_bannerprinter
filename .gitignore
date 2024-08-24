@@ -1,2 +1,1 @@
-
- *.lst *.map *~ *.rel *.cdb *.ihx *.lnk *.sym *.asm *.noi
+*.o *.lst *.map *~ *.rel *.cdb *.ihx *.lnk *.sym *.asm *.noi

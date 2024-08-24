@@ -1,4 +1,4 @@
-CC	= ../bin/lcc -Wa-l -Wl-m -Wl-j
+CC	= $(GBDKDIR)/bin/lcc -Wa-l -Wl-m -Wl-j
 
 BINS	   = bannerprint.gb
 CSOURCES   = $(foreach dir,./,$(notdir $(wildcard $(dir)/*.c)))
