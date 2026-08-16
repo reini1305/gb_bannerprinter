@@ -65,7 +65,7 @@ void PrinterInit (void)
     SendPrinterCommand(PRINTER_INIT);
 }
 
-int CheckLinkCable(){
+int CheckLinkCable(void){
     if(PrinterStatus[0] != 0){
         return 2;
     }
@@ -75,12 +75,12 @@ int CheckLinkCable(){
     return 0;
 }
 
-int GetPrinterStatus(){
+int GetPrinterStatus(void){
     SendPrinterCommand(PRINTER_STATUS);
     return CheckLinkCable();
 }
 
-int CheckForErrors(){
+int CheckForErrors(void){
     if(PrinterStatus[2] & 128){
         return 1;
     }
@@ -93,7 +93,7 @@ int CheckForErrors(){
     return 0;
 }
 
-uint8_t CheckBusy() {
+uint8_t CheckBusy(void) {
     SendPrinterCommand(PRINTER_STATUS);
     return (PrinterStatus[2] & 0x2);
 }
